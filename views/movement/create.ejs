@@ -1,0 +1,51 @@
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h4 class="mb-1">Create Movement Ticket</h4><p class="text-muted mb-0">Enter the dispatch memo details and add required parts.</p></div>
+    <a href="/movement-tickets" class="btn btn-light">Back to tickets</a>
+  </div>
+  <% if (!plants.length || !vehicles.length || !parts.length) { %>
+    <div class="alert alert-warning">Master data is not fully loaded. Add plants, vehicles and parts using the CSV templates in <code>docs/templates/</code> or the Master Data API before creating tickets.</div>
+  <% } %>
+  <form id="ticketForm">
+    <div class="card"><div class="card-header"><h5 class="mb-0">Memo details</h5></div><div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3"><label class="form-label">Plant</label><select class="form-select" name="plantCode"><option value="">Select plant</option><% plants.forEach(p=>{ %><option value="<%= p.code %>"><%= p.code %> - <%= p.name %></option><% }) %></select></div>
+        <div class="col-md-3"><label class="form-label">Vehicle number *</label><select class="form-select choices" name="vehicleNumber" required><option value="">Select vehicle</option><% vehicles.forEach(v=>{ %><option value="<%= v.registration %>"><%= v.registration %> <%= v.description ? '- '+v.description : '' %></option><% }) %></select></div>
+        <div class="col-md-3"><label class="form-label">Ticket date *</label><input class="form-control" type="date" name="ticketDate" value="<%= new Date().toISOString().slice(0,10) %>" required></div>
+        <div class="col-md-3"><label class="form-label">Sales order reference</label><input class="form-control" name="salesOrder" placeholder="Enter SAP sales order"></div>
+        <div class="col-md-3"><label class="form-label">Vendor type</label><select class="form-select" name="vendorType"><option value="">Select</option><option value="2">Code 2 (label to confirm)</option></select></div>
+        <div class="col-md-3"><label class="form-label">Transport mode</label><select class="form-select" name="transportMode"><option value="">Select</option><option value="1">Code 1 (label to confirm)</option></select></div>
+        <div class="col-md-3"><label class="form-label">Vehicle type</label><select class="form-select" name="vehicleType"><option value="">Select</option><option value="R">Code R (label to confirm)</option></select></div>
+        <div class="col-md-3"><label class="form-label">Distance (km)</label><input class="form-control" type="number" min="0" step="0.1" name="distanceKm" placeholder="e.g. 5"></div>
+        <div class="col-md-12"><label class="form-label">Remarks</label><input class="form-control" name="notes" placeholder="Optional memo remarks"></div>
+      </div>
+    </div></div>
+    <div class="card"><div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">Part details</h5><button type="button" class="btn btn-sm btn-primary" id="addRow"><i class="ri-add-line me-1"></i>Add part</button></div>
+      <div class="card-body"><div class="table-responsive"><table class="table table-bordered align-middle" id="itemsTable"><thead class="table-light"><tr><th style="min-width:280px">Part / Product</th><th>Product code</th><th>Customer reference</th><th>Sales order</th><th>Sub M</th><th style="width:120px">Quantity</th><th></th></tr></thead><tbody id="itemsBody"></tbody></table></div>
+      <div class="text-muted small">Choose a part from the master list. Reference fields are filled automatically. Quantity is entered manually.</div></div>
+    </div>
+    <div class="d-flex justify-content-end gap-2 mb-4"><a href="/movement-tickets" class="btn btn-light">Cancel</a><button type="submit" class="btn btn-success" id="saveBtn"><i class="ri-save-line me-1"></i>Save movement ticket</button></div>
+  </form>
+</div>
+<script>
+const PARTS = <%- JSON.stringify(parts.map(p=>({productCode:p.productCode,partName:p.partName,customerReference:p.customerReference,salesOrder:p.salesOrder,subM:p.subM,unit:p.unit}))) %>;
+const body = document.getElementById('itemsBody');\nconst vehicleSelect=document.querySelector('select[name=vehicleNumber]'); if(vehicleSelect && window.Choices) new Choices(vehicleSelect,{searchEnabled:true,shouldSort:false,itemSelectText:''});
+function addRow(){
+ const tr=document.createElement('tr');
+ tr.innerHTML=`<td><select class="form-select part-select" required><option value="">Search part...</option>${PARTS.map(p=>`<option value="${encodeURIComponent(p.productCode)}">${p.partName} (${p.productCode})</option>`).join('')}</select></td><td class="code text-muted">—</td><td class="customer text-muted">—</td><td class="order text-muted">—</td><td class="subm text-muted">—</td><td><input class="form-control qty" type="number" min="0.001" step="0.001" required placeholder="Qty"></td><td><button type="button" class="btn btn-sm btn-soft-danger remove"><i class="ri-delete-bin-line"></i></button></td>`;
+ body.appendChild(tr);
+ const sel=tr.querySelector('select');
+ sel.addEventListener('change',()=>{const p=PARTS.find(x=>x.productCode===decodeURIComponent(sel.value));tr.dataset.productCode=p?.productCode||'';tr.querySelector('.code').textContent=p?.productCode||'—';tr.querySelector('.customer').textContent=p?.customerReference||'—';tr.querySelector('.order').textContent=p?.salesOrder||'—';tr.querySelector('.subm').textContent=p?.subM||'—';});
+ tr.querySelector('.remove').addEventListener('click',()=>tr.remove());
+}
+document.getElementById('addRow').addEventListener('click',addRow); addRow();
+document.getElementById('ticketForm').addEventListener('submit',async e=>{
+ e.preventDefault(); const form=e.currentTarget; const fd=new FormData(form);
+ const items=[...body.querySelectorAll('tr')].map(tr=>({productCode:tr.dataset.productCode,quantity:tr.querySelector('.qty').value}));
+ if(items.some(x=>!x.productCode||!x.quantity)){alert('Select a part and quantity on every row.');return;}
+ const payload=Object.fromEntries(fd.entries()); payload.items=items;
+ const btn=document.getElementById('saveBtn');btn.disabled=true;
+ try{const r=await fetch('/api/movement-tickets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await r.json();if(!r.ok)throw new Error(data.message||'Unable to save ticket');location.href='/movement-tickets/'+data.id;}
+ catch(err){alert(err.message);btn.disabled=false;}
+});
+</script>

@@ -1,0 +1,5 @@
+<div class="d-flex justify-content-between align-items-center mb-4"><div><h4 class="mb-1">Movement Tickets</h4><p class="text-muted mb-0">Recently created dispatch memos</p></div><a href="/movement-tickets/new" class="btn btn-primary"><i class="ri-add-line me-1"></i>New ticket</a></div>
+<div class="card"><div class="card-body"><div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Ticket</th><th>Date</th><th>Vehicle</th><th>Sales order</th><th>Items</th><th>Status</th><th></th></tr></thead><tbody>
+<% if (!tickets.length) { %><tr><td colspan="7" class="text-center text-muted py-5">No movement tickets yet. Create your first ticket.</td></tr><% } %>
+<% tickets.forEach(t=>{ %><tr><td class="fw-semibold"><%= t.ticketNumber %></td><td><%= new Date(t.ticketDate).toLocaleDateString('en-IN') %></td><td><%= t.vehicleNumber %></td><td><%= t.salesOrder || '—' %></td><td><%= t.items.length %></td><td><span class="badge bg-warning-subtle text-warning"><%= t.status %></span></td><td><a class="btn btn-sm btn-light" href="/movement-tickets/<%= t.id %>">Open</a></td></tr><% }) %>
+</tbody></table></div></div></div>

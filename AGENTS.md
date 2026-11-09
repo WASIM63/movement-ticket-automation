@@ -1,0 +1,2 @@
+# Instructions for coding agents
+Before editing, read `docs/README.md` and all six workflow documents. Treat `docs/02-har-audit.md` as the evidence inventory and `docs/03-sap-api-mapping.md` as the API integration boundary. Do not replay SAP GUI WebGUI batch calls. Do not enable production SAP writes or invent missing API payloads. Update documentation whenever workflow behavior or status transitions change. Never store credentials or unredacted HAR/session artifacts in the repository.
