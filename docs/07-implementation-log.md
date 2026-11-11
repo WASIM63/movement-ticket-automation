@@ -48,3 +48,22 @@ The supplied HARs show SAP GUI for HTML batch requests rather than documented OD
 7. Implement billing creation and invoice PDF retrieval.
 8. Add print agent for the office printer.
 9. Add user authentication and role-based authorization before production use.
+
+
+## Sandbox OData adapter expansion (2026-11-11)
+1. Expanded the SAP integration service from a single Sales Order GET adapter to configurable OData V2/V4 read resources for sales orders, outbound deliveries, billing documents, electronic-document files and attachments.
+2. Added billing PDF retrieval returning base64 content and content type.
+3. Added parameterized POST/PATCH forwarding for documented delivery creation, picking, billing creation and future field-update operations.
+4. Restricted the client to HTTPS `sandbox.api.sap.com`; production tenant hosts are rejected.
+5. Kept sandbox writes fail-closed behind `SAP_SANDBOX_ALLOW_WRITES=false` by default.
+6. Added documented default service paths for Sales Order V2, Outbound Delivery V2, Billing Document V2/V4, delivery creation, picking and Billing Document Get PDF.
+7. Added environment configuration and `docs/11-sap-sandbox-odata-adapter.md`.
+
+## Remaining validation
+- The Hub API key has not yet been supplied/configured locally.
+- API Hub sandbox availability for each API/action is not yet proven by successful calls.
+- Electronic Document Cockpit fields and VF02 attachment list still require exact API/entity mapping.
+- Delivery custom vehicle field remains unmapped.
+- Billing-due selection operation remains to be verified.
+- Print agent is not implemented.
+- GitHub connector cannot run npm install, TypeScript build, Jest, Prisma generation or browser tests. Run these after pulling `main`.
