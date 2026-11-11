@@ -18,7 +18,7 @@ No endpoint path, entity key, function/action name, custom field, or request bod
 The API Hub sandbox may not offer write support for every API. If a configured operation is not supported by the selected sandbox, keep it disabled and record the limitation. Do not switch to the AutoLine production tenant.
 
 ## Built-in documented resource paths
-The adapter has default paths for the documented SAP S/4HANA Cloud services below. Each can be overridden in the local `.env` if the Hub's current code snippet differs:
+The adapter has default paths for the documented SAP S/4HANA Cloud services below. The Hub proxy prefix used in these examples is `/s4hanacloud`. Each can be overridden in the local `.env` if the Hub's current code snippet differs:
 - Sales Order V2: `/s4hanacloud/sap/opu/odata/sap/API_SALES_ORDER_SRV/A_SalesOrder`
 - Sales Order key lookup: `/s4hanacloud/sap/opu/odata/sap/API_SALES_ORDER_SRV/A_SalesOrder('{salesOrder}')`
 - Outbound Delivery V2: `/s4hanacloud/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=2/A_OutbDeliveryHeader`
@@ -26,9 +26,10 @@ The adapter has default paths for the documented SAP S/4HANA Cloud services belo
 - Billing Document V4: `/s4hanacloud/sap/opu/odata4/sap/api_billingdocument/srvd_a2x/sap/billingdocument/0001/BillingDocument`
 - Billing creation: `BillingDocument/SAP__self.CreateFromSDDocument` on the same V4 service.
 - Billing Document V2: `/s4hanacloud/sap/opu/odata/sap/API_BILLING_DOCUMENT_SRV/A_BillingDocument`
+- Attachments: `/s4hanacloud/sap/opu/odata/sap/API_CV_ATTACHMENT_SRV/GetAllOriginals` (requires `BusinessObjectTypeName` and `LinkedSAPObjectKey` query parameters)
 - Billing PDF: `Get PDF?BillingDocument='{billingDocument}'` on the same V2 service.
 
-These paths are based on SAP's published service examples. Their availability and supported operations in the Hub sandbox must still be tested with the user's API key. The Electronic Document Cockpit fields and attachment list do not yet have a confirmed mapping to these services.
+These paths are based on SAP's published service examples. Their availability and supported operations in the Hub sandbox must still be tested with the user's API key. The India eDocument/e-way-bill workflow is not a generic CRUD OData API. SAP documents it through India localization and SAP Integration Suite/GSP integration; no direct generic eDocument Cockpit write path is supplied here. The attachment API is confirmed, but the correct SAP business-object type/key for the invoice or delivery attachments must be confirmed.
 
 Official operation references:
 - Sales Order sandbox base path example: https://learning.sap.com/courses/developing-with-sap-build-process-automation/encapsulating-the-apis-of-remote-systems-using-actions-projects_d102638b-94d7-4c2e-9547-bb344e9aa9de
@@ -59,6 +60,7 @@ SAP_SANDBOX_ATTACHMENT_PATH=
 SAP_SANDBOX_CREATE_DELIVERY_PATH=
 SAP_SANDBOX_UPDATE_PICKING_PATH=
 SAP_SANDBOX_UPDATE_DELIVERY_PATH=
+SAP_SANDBOX_POST_GOODS_ISSUE_PATH=
 SAP_SANDBOX_CREATE_BILLING_PATH=
 SAP_SANDBOX_UPDATE_BILLING_PATH=
 SAP_SANDBOX_UPDATE_ELECTRONIC_DOC_PATH=
@@ -78,12 +80,12 @@ For the sales-order detail lookup, `SAP_SANDBOX_SALES_ORDER_KEY_PATH` must be th
 - `GET /api/sap/sandbox/billing-documents/v4?top=10`
 - `GET /api/sap/sandbox/billing-documents/v2?top=10`
 - `GET /api/sap/sandbox/billing-documents/:billingDocument/pdf` (returns base64 PDF data and content type)
-- `GET /api/sap/sandbox/electronic-document-files?top=10`
-- `GET /api/sap/sandbox/attachments?top=10`
+- `GET /api/sap/sandbox/attachments?businessObjectTypeName=...&linkedSapObjectKey=...`
 - `POST /api/sap/sandbox/operations/createOutboundDelivery`
 - `POST /api/sap/sandbox/operations/updatePicking`
 - `PATCH /api/sap/sandbox/operations/updateDeliveryFields`
 - `POST /api/sap/sandbox/operations/createBillingDocument`
+- `POST /api/sap/sandbox/operations/postGoodsIssue`
 - `PATCH /api/sap/sandbox/operations/updateBillingDocument`
 - `PATCH /api/sap/sandbox/operations/updateElectronicDocument`
 
@@ -100,7 +102,7 @@ The POST/PATCH routes are disabled by default. Delivery creation, picking and Bi
 8. Never configure the production AutoLine tenant in this sandbox adapter.
 
 ## Not implemented / not claimed
-- Full Electronic Document Cockpit automation. The recording shows opening a details dialog and saving/confirming it; the exact released OData API/action and field mapping remain unverified.
+- Full Electronic Document Cockpit automation. The India e-way-bill process uses SAP Integration Suite and a GST Suvidha Provider integration flow; it is not implemented by guessing an OData resource path. The recording shows opening a details dialog and saving/confirming it; the exact released OData API/action and field mapping remain unverified.
 - Silent physical printing. This needs an office-side print agent and a printer acknowledgement protocol.
 - Production communication arrangements, OAuth credentials, CSRF/ETag handling for the AutoLine tenant, or production writes.
 - Billing-due list selection API. Its exact released OData service/operation still needs confirmation.
