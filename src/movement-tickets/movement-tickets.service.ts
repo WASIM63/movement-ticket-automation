@@ -26,7 +26,7 @@ export class MovementTicketsService {
     const ticket = await this.prisma.movementTicket.create({
       data: {
         ticketNumber, ticketDate: date, vehicleNumber: input.vehicleNumber,
-        vehicleId: vehicle?.id, plantId: plant?.id, salesOrder: input.salesOrder || null,
+        vehicleId: vehicle?.id, plantId: plant?.id, salesOrder: null,
         vendorType: input.vendorType || null, transportMode: input.transportMode || null, vehicleType: input.vehicleType || null,
         distanceKm: input.distanceKm ? new Prisma.Decimal(input.distanceKm) : null,
         notes: input.notes || null,
@@ -37,7 +37,7 @@ export class MovementTicketsService {
             partId: part.id, productCode: part.productCode,
             partName: part.partName,
             customerReference: part.customerReference,
-            salesOrder: part.salesOrder || input.salesOrder || null,
+            salesOrder: part.salesOrder || null,
             subM: part.subM, quantity: new Prisma.Decimal(item.quantity), unit: part.unit,
           };
         })) },
