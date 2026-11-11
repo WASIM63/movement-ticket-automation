@@ -162,6 +162,38 @@ export class SapIntegrationService {
     return this.request(path, { query });
   }
 
+  async testSandboxReadApis() {
+    const checks: Array<{ name: string; env: string; query?: Record<string, string | number | undefined> }> = [
+      { name: 'Sales Order OData V2', env: PATH_ENV.salesOrders, query: { '$top': 1, '$format': 'json' } },
+      { name: 'Outbound Delivery OData V2', env: PATH_ENV.outboundDeliveries, query: { '$top': 1, '$format': 'json' } },
+      { name: 'Billing Document OData V4', env: PATH_ENV.billingDocumentsV4, query: { '$top': 1 } },
+      { name: 'Billing Document OData V2', env: PATH_ENV.billingDocumentsV2, query: { '$top': 1, '$format': 'json' } },
+      { name: 'Electronic Document File OData V4', env: PATH_ENV.electronicDocumentFiles, query: { '$top': 1 } },
+      { name: 'Attachment API', env: PATH_ENV.attachments, query: { '$top': 1, '$format': 'json' } },
+    ];
+    const results: Array<{ api: string; status: string; message: string }> = [];
+    for (const check of checks) {
+      const path = this.configuredPath(check.env, false);
+      if (!path) {
+        results.push({ api: check.name, status: 'not_configured', message: `Set ${check.env} after verifying the API sandbox path.` });
+        continue;
+      }
+      try {
+        await this.request(path, { query: check.query });
+        results.push({ api: check.name, status: 'reachable', message: 'Sandbox returned a successful response.' });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Sandbox request failed.';
+        results.push({ api: check.name, status: 'failed', message });
+      }
+    }
+    return {
+      mode: 'sandbox',
+      productionTouched: false,
+      checks: results,
+      note: 'A successful GET proves sandbox reachability only; it does not prove AutoLine tenant entitlement or write-operation support.',
+    };
+  }
+
   async readSandboxSalesOrders(top = 10, filter?: string) {
     const safeTop = Math.min(Math.max(Math.trunc(top), 1), 50);
     return this.readApi(PATH_ENV.salesOrders, { '$top': safeTop, '$format': 'json', '$filter': filter });
