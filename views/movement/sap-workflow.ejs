@@ -41,7 +41,7 @@
    const status = document.getElementById('pdfStatus');
    if (!value) { status.textContent = 'Enter a billing document number.'; return; }
    const url = '/api/sap/sandbox/billing-documents/' + encodeURIComponent(value) + '/pdf/file';
-   const tab = window.open(url, '_blank', 'noopener');
+   const tab = window.open(url, '_blank');
    status.textContent = tab ? 'Invoice PDF opened in a new tab.' : 'Pop-up blocked. Allow pop-ups and try again.';
  });
 })();
