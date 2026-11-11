@@ -146,13 +146,12 @@ export class SapIntegrationService {
     return this.request(path, { query });
   }
 
-  async readSandboxSalesOrders(top = 10) {
+  async readSandboxSalesOrders(top = 10, filter?: string) {
     const safeTop = Math.min(Math.max(Math.trunc(top), 1), 50);
-    return this.readApi(PATH_ENV.salesOrders, { '$top': safeTop, '$format': 'json' });
+    return this.readApi(PATH_ENV.salesOrders, { '$top': safeTop, '$format': 'json', '$filter': filter });
   }
 
   async readSandboxSalesOrder(salesOrder: string) {
-    const template = this.configuredPath(PATH_ENV.salesOrders)!;
     const keyPath = process.env.SAP_SANDBOX_SALES_ORDER_KEY_PATH?.trim();
     if (!keyPath) {
       throw new ServiceUnavailableException(
@@ -163,8 +162,6 @@ export class SapIntegrationService {
     if (path === keyPath) {
       throw new ServiceUnavailableException('Sales order key path must contain the {salesOrder} placeholder.');
     }
-    // The collection path must be configured too; this catches accidental configuration of a different API.
-    void template;
     return this.request(path, { query: { '$format': 'json' } });
   }
 
@@ -211,20 +208,19 @@ export class SapIntegrationService {
     method: SapMethod,
     body?: unknown,
   ) {
-    if (!['POST', 'PATCH'].includes(method)) {
-      throw new ServiceUnavailableException('Only POST and PATCH are accepted by this operation route.');
-    }
-    const allowed: Record<string, string> = {
-      createOutboundDelivery: 'SAP_SANDBOX_CREATE_DELIVERY_PATH',
-      updatePicking: 'SAP_SANDBOX_UPDATE_PICKING_PATH',
-      updateDeliveryFields: 'SAP_SANDBOX_UPDATE_DELIVERY_PATH',
-      createBillingDocument: 'SAP_SANDBOX_CREATE_BILLING_PATH',
-      updateBillingDocument: 'SAP_SANDBOX_UPDATE_BILLING_PATH',
-      updateElectronicDocument: 'SAP_SANDBOX_UPDATE_ELECTRONIC_DOC_PATH',
+    const allowed: Record<string, { env: string; method: SapMethod }> = {
+      createOutboundDelivery: { env: 'SAP_SANDBOX_CREATE_DELIVERY_PATH', method: 'POST' },
+      updatePicking: { env: 'SAP_SANDBOX_UPDATE_PICKING_PATH', method: 'POST' },
+      updateDeliveryFields: { env: 'SAP_SANDBOX_UPDATE_DELIVERY_PATH', method: 'PATCH' },
+      createBillingDocument: { env: 'SAP_SANDBOX_CREATE_BILLING_PATH', method: 'POST' },
+      updateBillingDocument: { env: 'SAP_SANDBOX_UPDATE_BILLING_PATH', method: 'PATCH' },
+      updateElectronicDocument: { env: 'SAP_SANDBOX_UPDATE_ELECTRONIC_DOC_PATH', method: 'PATCH' },
     };
-    const envName = allowed[operation];
-    if (!envName) throw new ServiceUnavailableException('Unknown or unsupported sandbox operation.');
-    const path = this.configuredPath(envName)!;
+    const definition = allowed[operation];
+    if (!definition || definition.method !== method) {
+      throw new ServiceUnavailableException('Unknown operation or HTTP method does not match the configured operation contract.');
+    }
+    const path = this.configuredPath(definition.env)!;
     return this.request(path, { method, body });
   }
 }
