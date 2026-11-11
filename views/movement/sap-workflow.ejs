@@ -19,7 +19,7 @@ const printCount = ticket.printCount || 0;
 
 <div class="row g-3 mb-4">
   <div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Movement ticket</div><h5 class="mb-1"><%= ticket.ticketNumber %></h5><span class="badge bg-secondary"><%= ticket.status %></span></div></div></div>
-  <div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Sales order</div><h5 class="mb-1"><%= ticket.salesOrder || 'Not linked' %></h5><small class="text-muted">From saved ticket data</small></div></div></div>
+  <div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Sales order</div><h5 class="mb-1"><%= [...new Set(ticket.items.map(i => i.salesOrder).filter(Boolean))].length %> mapped order(s)</h5><small class="text-muted">Derived from each part</small></div></div></div>
   <div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Outbound delivery</div><h5 class="mb-1"><%= ticket.sapDeliveryNumber || 'Pending' %></h5><small class="text-muted">VL01N</small></div></div></div>
   <div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Billing document</div><h5 class="mb-1"><%= ticket.sapBillingNumber || 'Pending' %></h5><small class="text-muted">VF01</small></div></div></div>
 </div>
@@ -28,7 +28,7 @@ const printCount = ticket.printCount || 0;
  <div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">Part-wise workflow</h5><span class="text-muted small"><%= ticket.items.length %> part(s)</span></div>
  <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Part</th><th>Sales order</th><th class="text-end">Quantity</th><th>Delivery</th><th>Invoice</th><th>Overall status</th></tr></thead><tbody>
  <% ticket.items.forEach((item) => { %>
- <tr><td><strong><%= item.productCode %></strong><div class="small text-muted"><%= item.partName %></div></td><td><%= item.salesOrder || ticket.salesOrder || '—' %></td><td class="text-end"><%= item.quantity %> <%= item.unit %></td><td><% if(ticket.sapDeliveryNumber){ %><span class="badge bg-success">Created</span><% } else { %><span class="badge bg-secondary">Pending</span><% } %></td><td><% if(ticket.sapBillingNumber){ %><span class="badge bg-success">Created</span><% } else { %><span class="badge bg-secondary">Pending</span><% } %></td><td><span class="badge bg-warning text-dark">In progress</span></td></tr>
+ <tr><td><strong><%= item.productCode %></strong><div class="small text-muted"><%= item.partName %></div></td><td><%= item.salesOrder || 'No mapping in part master' %></td><td class="text-end"><%= item.quantity %> <%= item.unit %></td><td><% if(ticket.sapDeliveryNumber){ %><span class="badge bg-success">Created</span><% } else { %><span class="badge bg-secondary">Pending</span><% } %></td><td><% if(ticket.sapBillingNumber){ %><span class="badge bg-success">Created</span><% } else { %><span class="badge bg-secondary">Pending</span><% } %></td><td><span class="badge bg-warning text-dark">In progress</span></td></tr>
  <% }) %>
  </tbody></table></div>
 </div>
