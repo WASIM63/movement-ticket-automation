@@ -191,6 +191,34 @@ export class SapIntegrationService {
     });
   }
 
+  async readSandboxBillingPdf(billingDocument: string) {
+    const template = this.configuredPath('SAP_SANDBOX_BILLING_PDF_PATH')!;
+    if (!template.includes('{billingDocument}')) {
+      throw new ServiceUnavailableException(
+        'SAP_SANDBOX_BILLING_PDF_PATH must contain the {billingDocument} placeholder and match the API GetPDF operation from its official specification.',
+      );
+    }
+    const path = template.replace('{billingDocument}', encodeURIComponent(billingDocument));
+    const { baseUrl, apiKey } = this.config();
+    const url = new URL(baseUrl + path);
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'GET',
+        headers: { APIKey: apiKey, Accept: 'application/pdf, application/json' },
+        signal: AbortSignal.timeout(20000),
+      });
+    } catch {
+      throw new BadGatewayException('Could not reach the SAP sandbox PDF operation.');
+    }
+    if (!response.ok) {
+      throw new BadGatewayException(`SAP sandbox returned HTTP ${response.status} for the configured billing PDF operation.`);
+    }
+    const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    const bytes = Buffer.from(await response.arrayBuffer());
+    return { contentType, data: bytes.toString('base64'), size: bytes.length };
+  }
+
   async readSandboxAttachments(top = 10) {
     return this.readApi(PATH_ENV.attachments, {
       '$top': Math.min(Math.max(Math.trunc(top), 1), 50),
