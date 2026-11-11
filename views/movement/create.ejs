@@ -29,7 +29,8 @@
 </div>
 <script>
 const PARTS = <%- JSON.stringify(parts.map(p=>({productCode:p.productCode,partName:p.partName,customerReference:p.customerReference,salesOrder:p.salesOrder,subM:p.subM,unit:p.unit}))) %>;
-const body = document.getElementById('itemsBody');\nconst vehicleSelect=document.querySelector('select[name=vehicleNumber]'); if(vehicleSelect && window.Choices) new Choices(vehicleSelect,{searchEnabled:true,shouldSort:false,itemSelectText:''});
+const body = document.getElementById('itemsBody');
+const vehicleSelect=document.querySelector('select[name=vehicleNumber]'); if(vehicleSelect && window.Choices) new Choices(vehicleSelect,{searchEnabled:true,shouldSort:false,itemSelectText:''});
 function addRow(){
  const tr=document.createElement('tr');
  tr.innerHTML=`<td><select class="form-select part-select" required><option value="">Search part...</option>${PARTS.map(p=>`<option value="${encodeURIComponent(p.productCode)}">${p.partName} (${p.productCode})</option>`).join('')}</select></td><td class="code text-muted">—</td><td class="customer text-muted">—</td><td class="order text-muted">—</td><td class="subm text-muted">—</td><td><input class="form-control qty" type="number" min="0.001" step="0.001" required placeholder="Qty"></td><td><button type="button" class="btn btn-sm btn-soft-danger remove"><i class="ri-delete-bin-line"></i></button></td>`;
