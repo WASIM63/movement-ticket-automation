@@ -29,6 +29,9 @@ export class MovementTicketsController {
   @Get('api/movement-tickets')
   async listApi() { return this.tickets.list(); }
 
+  @Post('api/movement-tickets/:id/print')
+  async recordPrint(@Param('id', ParseIntPipe) id: number) { return this.tickets.recordPrint(id); }
+
   @Get('api/movement-tickets/:id')
   async getApi(@Param('id', ParseIntPipe) id: number) { return this.tickets.get(id); }
 
