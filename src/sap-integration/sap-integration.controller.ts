@@ -23,6 +23,11 @@ export class SapIntegrationController {
     return this.sap.status().sandbox;
   }
 
+  @Get('sandbox/test-reads')
+  testReadApis() {
+    return this.sap.testSandboxReadApis();
+  }
+
   @Get('sandbox/sales-orders')
   salesOrders(@Query('top') top?: string, @Query('filter') filter?: string) {
     const parsed = top === undefined ? 10 : Number(top);
