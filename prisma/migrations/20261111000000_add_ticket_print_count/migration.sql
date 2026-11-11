@@ -1,0 +1,1 @@
+ALTER TABLE `MovementTicket` ADD COLUMN `printCount` INTEGER NOT NULL DEFAULT 0;
