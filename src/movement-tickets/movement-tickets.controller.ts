@@ -32,6 +32,12 @@ export class MovementTicketsController {
   @Get('api/movement-tickets/:id')
   async getApi(@Param('id', ParseIntPipe) id: number) { return this.tickets.get(id); }
 
+  @Get('movement-tickets/:id/workflow')
+  async workflow(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    const ticket = await this.tickets.get(id);
+    return res.render('movement/sap-workflow', { layout: 'layouts/movement', title: `SAP Workflow - ${ticket.ticketNumber}`, ticket });
+  }
+
   @Get('movement-tickets/:id')
   async detail(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
     const ticket = await this.tickets.get(id);
