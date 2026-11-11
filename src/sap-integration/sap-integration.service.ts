@@ -24,6 +24,10 @@ const DEFAULT_PATHS: Record<string, string> = {
   SAP_SANDBOX_CREATE_DELIVERY_PATH: '/s4hanacloud/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=2/A_OutbDeliveryHeader',
   SAP_SANDBOX_UPDATE_PICKING_PATH: "/s4hanacloud/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=2/SetPickingQuantityWithBaseQuantity?DeliveryDocument='{DeliveryDocument}'&DeliveryDocumentItem='{DeliveryDocumentItem}'&ActualDeliveredQtyInBaseUnit={ActualDeliveredQtyInBaseUnit}&BaseUnit='{BaseUnit}'",
   SAP_SANDBOX_CREATE_BILLING_PATH: '/s4hanacloud/sap/opu/odata4/sap/api_billingdocument/srvd_a2x/sap/billingdocument/0001/BillingDocument/SAP__self.CreateFromSDDocument',
+  SAP_SANDBOX_UPDATE_DELIVERY_PATH: "/s4hanacloud/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=2/A_OutbDeliveryHeader(DeliveryDocument='{DeliveryDocument}')",
+  SAP_SANDBOX_POST_GOODS_ISSUE_PATH: "/s4hanacloud/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=2/PostGoodsIssue?DeliveryDocument='{DeliveryDocument}'",
+  SAP_SANDBOX_UPDATE_BILLING_PATH: "/s4hanacloud/sap/opu/odata4/sap/api_billingdocument/srvd_a2x/sap/billingdocument/0001/BillingDocument('{BillingDocument}')",
+  SAP_SANDBOX_ATTACHMENT_PATH: '/s4hanacloud/sap/opu/odata/sap/API_CV_ATTACHMENT_SRV/GetAllOriginals',
 };
 
 const PATH_ENV: Record<string, string> = {
@@ -31,7 +35,6 @@ const PATH_ENV: Record<string, string> = {
   outboundDeliveries: 'SAP_SANDBOX_OUTBOUND_DELIVERY_PATH',
   billingDocumentsV4: 'SAP_SANDBOX_BILLING_DOCUMENT_V4_PATH',
   billingDocumentsV2: 'SAP_SANDBOX_BILLING_DOCUMENT_V2_PATH',
-  electronicDocumentFiles: 'SAP_SANDBOX_ELECTRONIC_DOC_FILE_PATH',
   billingPdf: 'SAP_SANDBOX_BILLING_PDF_PATH',
   attachments: 'SAP_SANDBOX_ATTACHMENT_PATH',
 };
@@ -168,7 +171,6 @@ export class SapIntegrationService {
       { name: 'Outbound Delivery OData V2', env: PATH_ENV.outboundDeliveries, query: { '$top': 1, '$format': 'json' } },
       { name: 'Billing Document OData V4', env: PATH_ENV.billingDocumentsV4, query: { '$top': 1 } },
       { name: 'Billing Document OData V2', env: PATH_ENV.billingDocumentsV2, query: { '$top': 1, '$format': 'json' } },
-      { name: 'Electronic Document File OData V4', env: PATH_ENV.electronicDocumentFiles, query: { '$top': 1 } },
       { name: 'Attachment API', env: PATH_ENV.attachments, query: { '$top': 1, '$format': 'json' } },
     ];
     const results: Array<{ api: string; status: string; message: string }> = [];
@@ -233,12 +235,6 @@ export class SapIntegrationService {
     });
   }
 
-  async readSandboxElectronicDocumentFiles(top = 10) {
-    return this.readApi(PATH_ENV.electronicDocumentFiles, {
-      '$top': Math.min(Math.max(Math.trunc(top), 1), 50),
-    });
-  }
-
   async readSandboxBillingPdf(billingDocument: string) {
     const template = this.configuredPath('SAP_SANDBOX_BILLING_PDF_PATH')!;
     if (!template.includes('{billingDocument}')) {
@@ -297,6 +293,7 @@ export class SapIntegrationService {
       createOutboundDelivery: { env: 'SAP_SANDBOX_CREATE_DELIVERY_PATH', method: 'POST' },
       updatePicking: { env: 'SAP_SANDBOX_UPDATE_PICKING_PATH', method: 'POST' },
       updateDeliveryFields: { env: 'SAP_SANDBOX_UPDATE_DELIVERY_PATH', method: 'PATCH' },
+      postGoodsIssue: { env: 'SAP_SANDBOX_POST_GOODS_ISSUE_PATH', method: 'POST' },
       createBillingDocument: { env: 'SAP_SANDBOX_CREATE_BILLING_PATH', method: 'POST' },
       updateBillingDocument: { env: 'SAP_SANDBOX_UPDATE_BILLING_PATH', method: 'PATCH' },
       updateElectronicDocument: { env: 'SAP_SANDBOX_UPDATE_ELECTRONIC_DOC_PATH', method: 'PATCH' },
