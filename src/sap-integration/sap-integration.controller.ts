@@ -69,9 +69,11 @@ export class SapIntegrationController {
   }
 
   @Get('sandbox/attachments')
-  attachments(@Query('top') top?: string) {
-    const parsed = top === undefined ? 10 : Number(top);
-    return this.sap.readSandboxAttachments(Number.isFinite(parsed) ? parsed : 10);
+  attachments(
+    @Query('businessObjectTypeName') businessObjectTypeName: string,
+    @Query('linkedSapObjectKey') linkedSapObjectKey: string,
+  ) {
+    return this.sap.readSandboxAttachments(businessObjectTypeName, linkedSapObjectKey);
   }
 
   @Post('sandbox/operations/:operation')
