@@ -8,7 +8,10 @@ This folder is the working documentation set for developers and coding agents.
 - `03-sap-api-mapping.md` — official SAP S/4HANA Cloud 2608 API references and integration decisions.
 - `04-data-model.md` — application data model and master-data setup.
 - `05-runbook.md` — local setup, database, testing and deployment.
-- `06-agent-guidelines.md` — rules for future AI coding agents.\n- `09-one-second-video-audit.md` — one-second review of the SAP screen recording.\n- `10-sap-business-accelerator-sandbox.md` — Hub sandbox rules and initial read-only integration.\n- `11-sap-sandbox-odata-adapter.md` — sandbox OData adapter routes, configuration and test boundaries.
+- `06-agent-guidelines.md` — rules for future AI coding agents.
+- `09-one-second-video-audit.md` — one-second review of the SAP screen recording.
+- `10-sap-business-accelerator-sandbox.md` — Hub sandbox rules and initial read-only integration.
+- `11-sap-sandbox-odata-adapter.md` — sandbox OData adapter routes, configuration and test boundaries.
 - `templates/` — CSV templates for verified plant, vehicle and part master data.
 
 ## Evidence policy
