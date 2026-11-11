@@ -12,6 +12,7 @@ This folder is the working documentation set for developers and coding agents.
 - `09-one-second-video-audit.md` — one-second review of the SAP screen recording.
 - `10-sap-business-accelerator-sandbox.md` — Hub sandbox rules and initial read-only integration.
 - `11-sap-sandbox-odata-adapter.md` — sandbox OData adapter routes, configuration and test boundaries.
+- `12-sap-workflow-workbench.md` — per-ticket sandbox read workbench and remaining verified-contract gaps.
 - `templates/` — CSV templates for verified plant, vehicle and part master data.
 
 ## Evidence policy
