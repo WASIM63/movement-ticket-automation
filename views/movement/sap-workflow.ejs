@@ -2,7 +2,7 @@
 const steps = [
   { code: 'VL01N', name: 'Create outbound delivery', detail: 'Create delivery with reference to the sales order', field: 'sapDeliveryNumber' },
   { code: 'VL02N', name: 'Picking & delivery details', detail: 'Picking quantity, vehicle and transport details', field: 'sapDeliveryNumber' },
-  { code: 'PGI', name: 'Post goods issue', detail: 'Goods issue after dispatch confirmation', field: 'sapDeliveryNumber' },
+  { code: 'VL02N / PGI', name: 'Post goods issue', detail: 'Goods issue after dispatch confirmation', field: 'goodsIssue' },
   { code: 'VF01', name: 'Create billing document', detail: 'Create invoice from the eligible reference document', field: 'sapBillingNumber' },
   { code: 'DS', name: 'Digital signature', detail: 'Generate / apply the authorised digital signature', field: 'signedPdf' },
   { code: 'ATT', name: 'Add signed attachment', detail: 'Attach the signed PDF to the SAP billing document', field: 'signedAttachment' },
@@ -36,7 +36,7 @@ const printCount = ticket.printCount || 0;
 <div class="card mb-4">
  <div class="card-header"><h5 class="mb-0">SAP transaction timeline</h5></div>
  <div class="card-body"><div class="list-group list-group-flush">
- <% steps.forEach((step, index) => { const completed = done(step.field); %>
+ <% steps.forEach((step, index) => { const completed = (step.code === 'VL01N' && Boolean(ticket.sapDeliveryNumber)) || (step.code === 'VF01' && Boolean(ticket.sapBillingNumber)); %>
  <div class="list-group-item px-0 d-flex align-items-start gap-3">
    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 <%= completed ? 'bg-success' : 'bg-light border' %>" style="width:36px;height:36px"><% if(completed){ %><i class="ri-check-line text-white"></i><% } else { %><span class="small fw-semibold"><%= index+1 %></span><% } %></div>
    <div class="flex-grow-1"><div class="d-flex flex-wrap align-items-center gap-2"><strong><%= step.name %></strong><span class="badge bg-light text-dark border"><%= step.code %></span><% if(completed){ %><span class="badge bg-success">Reference available</span><% } else { %><span class="badge bg-secondary">Awaiting integration</span><% } %></div><div class="small text-muted mt-1"><%= step.detail %></div></div>
