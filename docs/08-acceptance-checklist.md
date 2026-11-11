@@ -39,6 +39,10 @@
 - [ ] Billing Document OData V4 GET returns sample data
 - [ ] Billing Document OData V2 GET returns sample data
 - [ ] Billing Document Get PDF returns base64 PDF content
+- [ ] Per-ticket SAP workflow workbench renders
+- [ ] Workbench can read sales order, delivery and billing sample data
+- [ ] Invoice PDF file route opens a sandbox invoice in the browser
+- [ ] Local npm build and browser verification completed
 - [ ] Confirm each POST/PATCH operation is actually supported by Hub sandbox before enabling writes
 - [ ] Test delivery creation with sample sales order only
 - [ ] Test picking operation with a sample delivery and current ETag/CSRF requirements
