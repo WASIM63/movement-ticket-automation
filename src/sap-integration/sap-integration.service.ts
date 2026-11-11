@@ -263,6 +263,15 @@ export class SapIntegrationService {
       throw new BadGatewayException(`SAP sandbox returned HTTP ${response.status} for the configured billing PDF operation.`);
     }
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    if (contentType.includes('json')) {
+      const result = await response.json() as { BillingDocumentBinary?: string; d?: { BillingDocumentBinary?: string } };
+      const encoded = result.BillingDocumentBinary || result.d?.BillingDocumentBinary;
+      if (!encoded) {
+        throw new BadGatewayException('SAP GetPDF response did not contain BillingDocumentBinary.');
+      }
+      const bytes = Buffer.from(encoded, 'base64');
+      return { contentType: 'application/pdf', data: bytes.toString('base64'), size: bytes.length };
+    }
     const bytes = Buffer.from(await response.arrayBuffer());
     return { contentType, data: bytes.toString('base64'), size: bytes.length };
   }
