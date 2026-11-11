@@ -25,9 +25,9 @@ export class SapIntegrationController {
   }
 
   @Get('sandbox/sales-orders')
-  salesOrders(@Query('top') top?: string) {
+  salesOrders(@Query('top') top?: string, @Query('filter') filter?: string) {
     const parsed = top === undefined ? 10 : Number(top);
-    return this.sap.readSandboxSalesOrders(Number.isFinite(parsed) ? parsed : 10);
+    return this.sap.readSandboxSalesOrders(Number.isFinite(parsed) ? parsed : 10, filter);
   }
 
   @Get('sandbox/sales-orders/:salesOrder')
