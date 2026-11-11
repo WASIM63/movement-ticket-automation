@@ -6,7 +6,9 @@ import {
   Post,
   Patch,
   Query,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { SapIntegrationService } from './sap-integration.service';
 
 @Controller('api/sap')
@@ -60,6 +62,16 @@ export class SapIntegrationController {
   @Get('sandbox/billing-documents/:billingDocument/pdf')
   billingPdf(@Param('billingDocument') billingDocument: string) {
     return this.sap.readSandboxBillingPdf(billingDocument);
+  }
+
+  @Get('sandbox/billing-documents/:billingDocument/pdf/file')
+  async billingPdfFile(@Param('billingDocument') billingDocument: string, @Res() res: Response) {
+    const pdf = await this.sap.readSandboxBillingPdf(billingDocument);
+    const bytes = Buffer.from(pdf.data, 'base64');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', String(bytes.length));
+    res.setHeader('Content-Disposition', `inline; filename="invoice-${billingDocument}.pdf"`);
+    return res.send(bytes);
   }
 
   @Get('sandbox/attachments')
