@@ -14,6 +14,18 @@ type SapRequestOptions = {
   headers?: Record<string, string>;
 };
 
+const DEFAULT_PATHS: Record<string, string> = {
+  SAP_SANDBOX_SALES_ORDER_PATH: '/s4hanacloud/sap/opu/odata/sap/API_SALES_ORDER_SRV/A_SalesOrder',
+  SAP_SANDBOX_SALES_ORDER_KEY_PATH: "/s4hanacloud/sap/opu/odata/sap/API_SALES_ORDER_SRV/A_SalesOrder('{salesOrder}')",
+  SAP_SANDBOX_OUTBOUND_DELIVERY_PATH: '/s4hanacloud/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=2/A_OutbDeliveryHeader',
+  SAP_SANDBOX_BILLING_DOCUMENT_V4_PATH: '/s4hanacloud/sap/opu/odata4/sap/api_billingdocument/srvd_a2x/sap/billingdocument/0001/BillingDocument',
+  SAP_SANDBOX_BILLING_DOCUMENT_V2_PATH: '/s4hanacloud/sap/opu/odata/sap/API_BILLING_DOCUMENT_SRV/A_BillingDocument',
+  SAP_SANDBOX_BILLING_PDF_PATH: "/s4hanacloud/sap/opu/odata/sap/API_BILLING_DOCUMENT_SRV/Get%20PDF?BillingDocument='{billingDocument}'",
+  SAP_SANDBOX_CREATE_DELIVERY_PATH: '/s4hanacloud/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=2/A_OutbDeliveryHeader',
+  SAP_SANDBOX_UPDATE_PICKING_PATH: "/s4hanacloud/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=2/SetPickingQuantityWithBaseQuantity?DeliveryDocument='{DeliveryDocument}'&DeliveryDocumentItem='{DeliveryDocumentItem}'&ActualDeliveredQtyInBaseUnit={ActualDeliveredQtyInBaseUnit}&BaseUnit='{BaseUnit}'",
+  SAP_SANDBOX_CREATE_BILLING_PATH: '/s4hanacloud/sap/opu/odata4/sap/api_billingdocument/srvd_a2x/sap/billingdocument/0001/BillingDocument/SAP__self.CreateFromSDDocument',
+};
+
 const PATH_ENV: Record<string, string> = {
   salesOrders: 'SAP_SANDBOX_SALES_ORDER_PATH',
   outboundDeliveries: 'SAP_SANDBOX_OUTBOUND_DELIVERY_PATH',
@@ -84,7 +96,7 @@ export class SapIntegrationService {
   }
 
   private configuredPath(envName: string, required = true): string | undefined {
-    const path = process.env[envName]?.trim();
+    const path = (process.env[envName] || DEFAULT_PATHS[envName])?.trim();
     if (!path) {
       if (!required) return undefined;
       throw new ServiceUnavailableException(
@@ -156,7 +168,7 @@ export class SapIntegrationService {
   }
 
   async readSandboxSalesOrder(salesOrder: string) {
-    const keyPath = process.env.SAP_SANDBOX_SALES_ORDER_KEY_PATH?.trim();
+    const keyPath = (process.env.SAP_SANDBOX_SALES_ORDER_KEY_PATH || DEFAULT_PATHS.SAP_SANDBOX_SALES_ORDER_KEY_PATH).trim();
     if (!keyPath) {
       throw new ServiceUnavailableException(
         'Set SAP_SANDBOX_SALES_ORDER_KEY_PATH to the exact entity-key path template from the API specification, using {salesOrder} as the placeholder. No entity/property name is guessed.',
@@ -252,7 +264,17 @@ export class SapIntegrationService {
     if (!definition || definition.method !== method) {
       throw new ServiceUnavailableException('Unknown operation or HTTP method does not match the configured operation contract.');
     }
-    const path = this.configuredPath(definition.env)!;
-    return this.request(path, { method, body });
+    let path = this.configuredPath(definition.env)!;
+    const envelope = body && typeof body === 'object' ? body as { parameters?: Record<string, string | number>; payload?: unknown } : undefined;
+    if (envelope?.parameters) {
+      for (const [name, value] of Object.entries(envelope.parameters)) {
+        path = path.replaceAll(`{${name}}`, encodeURIComponent(String(value)));
+      }
+    }
+    if (/\\{[A-Za-z0-9_]+\\}/.test(path)) {
+      throw new ServiceUnavailableException('The configured operation path contains unresolved parameters. Supply matching values in the parameters object.');
+    }
+    const requestBody = envelope && Object.prototype.hasOwnProperty.call(envelope, 'payload') ? envelope.payload : body;
+    return this.request(path, { method, body: requestBody });
   }
 }
