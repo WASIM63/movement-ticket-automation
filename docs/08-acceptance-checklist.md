@@ -28,3 +28,21 @@
 - [ ] Approved local print agent installed
 - [ ] Movement ticket and invoice PDF print to correct printer
 - [ ] Print result/failure recorded
+
+
+## SAP Business Accelerator Hub sandbox adapter
+- [ ] Configure personal Hub API key in local `.env` only
+- [ ] `GET /api/sap/sandbox/status` reports key configured and built-in API paths
+- [ ] Sales Order OData V2 collection GET returns sample data
+- [ ] Sales Order key GET returns the selected sample order
+- [ ] Outbound Delivery OData V2 GET returns sample data
+- [ ] Billing Document OData V4 GET returns sample data
+- [ ] Billing Document OData V2 GET returns sample data
+- [ ] Billing Document Get PDF returns base64 PDF content
+- [ ] Confirm each POST/PATCH operation is actually supported by Hub sandbox before enabling writes
+- [ ] Test delivery creation with sample sales order only
+- [ ] Test picking operation with a sample delivery and current ETag/CSRF requirements
+- [ ] Test billing creation with a billable sample SD document
+- [ ] Record real SAP document numbers from returned responses
+- [ ] Verify electronic cockpit and attachment API availability separately
+- [ ] Verify no request can reach the AutoLine production tenant
