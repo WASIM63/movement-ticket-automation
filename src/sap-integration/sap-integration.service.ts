@@ -20,6 +20,7 @@ const PATH_ENV: Record<string, string> = {
   billingDocumentsV4: 'SAP_SANDBOX_BILLING_DOCUMENT_V4_PATH',
   billingDocumentsV2: 'SAP_SANDBOX_BILLING_DOCUMENT_V2_PATH',
   electronicDocumentFiles: 'SAP_SANDBOX_ELECTRONIC_DOC_FILE_PATH',
+  billingPdf: 'SAP_SANDBOX_BILLING_PDF_PATH',
   attachments: 'SAP_SANDBOX_ATTACHMENT_PATH',
 };
 
@@ -57,6 +58,9 @@ export class SapIntegrationService {
   }
 
   private config() {
+    if ((process.env.SAP_MODE || 'sandbox') !== 'sandbox') {
+      throw new ServiceUnavailableException('This SAP adapter only runs in SAP_MODE=sandbox. Production mode is not supported.');
+    }
     const baseUrl = process.env.SAP_SANDBOX_BASE_URL || 'https://sandbox.api.sap.com';
     const apiKey = process.env.SAP_SANDBOX_API_KEY;
     if (!apiKey) {
