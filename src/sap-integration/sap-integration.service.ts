@@ -171,7 +171,6 @@ export class SapIntegrationService {
       { name: 'Outbound Delivery OData V2', env: PATH_ENV.outboundDeliveries, query: { '$top': 1, '$format': 'json' } },
       { name: 'Billing Document OData V4', env: PATH_ENV.billingDocumentsV4, query: { '$top': 1 } },
       { name: 'Billing Document OData V2', env: PATH_ENV.billingDocumentsV2, query: { '$top': 1, '$format': 'json' } },
-      { name: 'Attachment API', env: PATH_ENV.attachments, query: { '$top': 1, '$format': 'json' } },
     ];
     const results: Array<{ api: string; status: string; message: string }> = [];
     for (const check of checks) {
@@ -272,9 +271,13 @@ export class SapIntegrationService {
     return { contentType, data: bytes.toString('base64'), size: bytes.length };
   }
 
-  async readSandboxAttachments(top = 10) {
+  async readSandboxAttachments(businessObjectTypeName: string, linkedSapObjectKey: string) {
+    if (!businessObjectTypeName?.trim() || !linkedSapObjectKey?.trim()) {
+      throw new ServiceUnavailableException('Attachment lookup requires BusinessObjectTypeName and LinkedSAPObjectKey for the target SAP business object.');
+    }
     return this.readApi(PATH_ENV.attachments, {
-      '$top': Math.min(Math.max(Math.trunc(top), 1), 50),
+      BusinessObjectTypeName: `'${businessObjectTypeName.trim()}'`,
+      LinkedSAPObjectKey: `'${linkedSapObjectKey.trim()}'`,
       '$format': 'json',
     });
   }
