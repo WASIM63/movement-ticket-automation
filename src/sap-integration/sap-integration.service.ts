@@ -271,7 +271,7 @@ export class SapIntegrationService {
         path = path.replaceAll(`{${name}}`, encodeURIComponent(String(value)));
       }
     }
-    if (/\\{[A-Za-z0-9_]+\\}/.test(path)) {
+    if (/\{[A-Za-z0-9_]+\}/.test(path)) {
       throw new ServiceUnavailableException('The configured operation path contains unresolved parameters. Supply matching values in the parameters object.');
     }
     const requestBody = envelope && Object.prototype.hasOwnProperty.call(envelope, 'payload') ? envelope.payload : body;
