@@ -52,6 +52,12 @@ export class MovementTicketsService {
     return this.prisma.movementTicket.findMany({ include: { items: true }, orderBy: { createdAt: 'desc' }, take: 100 });
   }
 
+  async recordPrint(id: number) {
+    const ticket = await this.prisma.movementTicket.update({ where: { id }, data: { printCount: { increment: 1 } }, select: { id: true, printCount: true, ticketNumber: true } });
+    await this.prisma.auditLog.create({ data: { entityType: 'MovementTicket', entityId: String(id), action: 'PRINT_INITIATED', details: { printCount: ticket.printCount } } });
+    return ticket;
+  }
+
   async get(id: number) {
     const ticket = await this.prisma.movementTicket.findUnique({ where: { id }, include: { items: true, plant: true, vehicle: true } });
     if (!ticket) throw new NotFoundException('Movement ticket not found');
