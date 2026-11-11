@@ -50,3 +50,7 @@ Official SAP references:
 - Read routes use GET only and send the APIKey header.
 - No write operation is exposed by the sandbox controller.
 - No live SAP operation is reported as successful without a real SAP response.
+
+
+## Current adapter status
+The initial read-only Sales Order implementation described above has been expanded. See `docs/11-sap-sandbox-odata-adapter.md` for the current configurable OData V2/V4 sandbox routes. That adapter includes guarded POST/PATCH request forwarding, but no write is enabled by default and no endpoint or payload is inferred. The API key alone is not enough: each API's exact sandbox resource path and each write operation's exact schema must also be configured from the corresponding official SAP API specification/code snippet.
