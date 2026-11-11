@@ -25,7 +25,7 @@ Official SAP references:
   - `GET /api/sap/sandbox/sales-orders/:salesOrder`
 - Exact service-relative path is configurable as `SAP_SANDBOX_SALES_ORDER_PATH`; copy it from the Sales Order API's own sandbox code snippet/API details. No unverified service path is hard-coded.
 - API errors are normalized without echoing response bodies or credentials.
-- No sandbox create/update/delete/post routes exist.
+- At the initial read-only stage, no sandbox create/update routes existed. The current guarded POST/PATCH adapter is documented in `docs/11-sap-sandbox-odata-adapter.md`; it remains disabled by default.
 
 ## Local configuration
 1. Copy `.env.example` to `.env`.
