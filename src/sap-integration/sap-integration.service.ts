@@ -134,10 +134,10 @@ export class SapIntegrationService {
         headers: {
           APIKey: apiKey,
           Accept: 'application/json',
-          ...(options.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+          ...(options.body === undefined || options.body === null ? {} : { 'Content-Type': 'application/json' }),
           ...(options.headers || {}),
         },
-        body: options.body === undefined ? undefined : JSON.stringify(options.body),
+        body: options.body === undefined || options.body === null ? undefined : JSON.stringify(options.body),
         signal: AbortSignal.timeout(20000),
       });
     } catch {
@@ -265,7 +265,7 @@ export class SapIntegrationService {
       throw new ServiceUnavailableException('Unknown operation or HTTP method does not match the configured operation contract.');
     }
     let path = this.configuredPath(definition.env)!;
-    const envelope = body && typeof body === 'object' ? body as { parameters?: Record<string, string | number>; payload?: unknown } : undefined;
+    const envelope = body && typeof body === 'object' ? body as { parameters?: Record<string, string | number>; payload?: unknown; headers?: { ifMatch?: string; csrfToken?: string } } : undefined;
     if (envelope?.parameters) {
       for (const [name, value] of Object.entries(envelope.parameters)) {
         path = path.replaceAll(`{${name}}`, encodeURIComponent(String(value)));
@@ -274,7 +274,10 @@ export class SapIntegrationService {
     if (/\{[A-Za-z0-9_]+\}/.test(path)) {
       throw new ServiceUnavailableException('The configured operation path contains unresolved parameters. Supply matching values in the parameters object.');
     }
-    const requestBody = envelope && Object.prototype.hasOwnProperty.call(envelope, 'payload') ? envelope.payload : body;
-    return this.request(path, { method, body: requestBody });
+    const requestBody = envelope && Object.prototype.hasOwnProperty.call(envelope, 'payload') ? envelope.payload : envelope?.parameters ? undefined : body;
+    const headers: Record<string, string> = {};
+    if (envelope?.headers?.ifMatch) headers['If-Match'] = envelope.headers.ifMatch;
+    if (envelope?.headers?.csrfToken) headers['X-CSRF-Token'] = envelope.headers.csrfToken;
+    return this.request(path, { method, body: requestBody, headers });
   }
 }
