@@ -30,6 +30,7 @@ SAP_SANDBOX_SALES_ORDER_KEY_PATH=
 SAP_SANDBOX_OUTBOUND_DELIVERY_PATH=
 SAP_SANDBOX_BILLING_DOCUMENT_V4_PATH=
 SAP_SANDBOX_BILLING_DOCUMENT_V2_PATH=
+SAP_SANDBOX_BILLING_PDF_PATH=
 SAP_SANDBOX_ELECTRONIC_DOC_FILE_PATH=
 SAP_SANDBOX_ATTACHMENT_PATH=
 
@@ -53,6 +54,7 @@ For the sales-order detail lookup, `SAP_SANDBOX_SALES_ORDER_KEY_PATH` must be th
 - `GET /api/sap/sandbox/outbound-deliveries?top=10`
 - `GET /api/sap/sandbox/billing-documents/v4?top=10`
 - `GET /api/sap/sandbox/billing-documents/v2?top=10`
+- `GET /api/sap/sandbox/billing-documents/:billingDocument/pdf` (returns base64 PDF data and content type)
 - `GET /api/sap/sandbox/electronic-document-files?top=10`
 - `GET /api/sap/sandbox/attachments?top=10`
 - `POST /api/sap/sandbox/operations/createOutboundDelivery`
