@@ -25,7 +25,7 @@ Official SAP references:
   - `GET /api/sap/sandbox/sales-orders/:salesOrder`
 - Exact service-relative path is configurable as `SAP_SANDBOX_SALES_ORDER_PATH`; copy it from the Sales Order API's own sandbox code snippet/API details. No unverified service path is hard-coded.
 - API errors are normalized without echoing response bodies or credentials.
-- No sandbox create/update/delete/post routes exist.
+- At the initial read-only stage, no sandbox create/update routes existed. The current guarded POST/PATCH adapter is documented in `docs/11-sap-sandbox-odata-adapter.md`; it remains disabled by default.
 
 ## Local configuration
 1. Copy `.env.example` to `.env`.
@@ -50,3 +50,7 @@ Official SAP references:
 - Read routes use GET only and send the APIKey header.
 - No write operation is exposed by the sandbox controller.
 - No live SAP operation is reported as successful without a real SAP response.
+
+
+## Current adapter status
+The initial read-only Sales Order implementation described above has been expanded. See `docs/11-sap-sandbox-odata-adapter.md` for the current configurable OData V2/V4 sandbox routes. That adapter includes guarded POST/PATCH request forwarding, but no write is enabled by default and no endpoint or payload is inferred. The API key alone is not enough: each API's exact sandbox resource path and each write operation's exact schema must also be configured from the corresponding official SAP API specification/code snippet.
