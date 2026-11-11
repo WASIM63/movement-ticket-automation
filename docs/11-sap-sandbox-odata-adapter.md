@@ -17,6 +17,27 @@ No endpoint path, entity key, function/action name, custom field, or request bod
 
 The API Hub sandbox may not offer write support for every API. If a configured operation is not supported by the selected sandbox, keep it disabled and record the limitation. Do not switch to the AutoLine production tenant.
 
+## Built-in documented resource paths
+The adapter has default paths for the documented SAP S/4HANA Cloud services below. Each can be overridden in the local `.env` if the Hub's current code snippet differs:
+- Sales Order V2: `/s4hanacloud/sap/opu/odata/sap/API_SALES_ORDER_SRV/A_SalesOrder`
+- Sales Order key lookup: `/s4hanacloud/sap/opu/odata/sap/API_SALES_ORDER_SRV/A_SalesOrder('{salesOrder}')`
+- Outbound Delivery V2: `/s4hanacloud/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=2/A_OutbDeliveryHeader`
+- Picking: `SetPickingQuantityWithBaseQuantity` function import on the same V2 service, with delivery/item/quantity/unit parameters.
+- Billing Document V4: `/s4hanacloud/sap/opu/odata4/sap/api_billingdocument/srvd_a2x/sap/billingdocument/0001/BillingDocument`
+- Billing creation: `BillingDocument/SAP__self.CreateFromSDDocument` on the same V4 service.
+- Billing Document V2: `/s4hanacloud/sap/opu/odata/sap/API_BILLING_DOCUMENT_SRV/A_BillingDocument`
+- Billing PDF: `Get PDF?BillingDocument='{billingDocument}'` on the same V2 service.
+
+These paths are based on SAP's published service examples. Their availability and supported operations in the Hub sandbox must still be tested with the user's API key. The Electronic Document Cockpit fields and attachment list do not yet have a confirmed mapping to these services.
+
+Official operation references:
+- Sales Order sandbox base path example: https://learning.sap.com/courses/developing-with-sap-build-process-automation/encapsulating-the-apis-of-remote-systems-using-actions-projects_d102638b-94d7-4c2e-9547-bb344e9aa9de
+- Outbound Delivery create: https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/2f36056ae9a044bba55bcbad204b7bc5/ab6845012ee148ba9c2694648c2a0685.html
+- Outbound Delivery read: https://help.sap.com/docs/PRODUCT_ID/588780cab2774a7ab9fffca3a7f919fe/364944fb5b1246c7b4de26401b5f1f82.html
+- Picking quantity: https://help.sap.com/docs/SAP_S4HANA_CLOUD/588780cab2774a7ab9fffca3a7f919fe/66c9866e4ab947aa8297d1083ec52643.html
+- Billing Document create: https://help.sap.com/docs/SAP_S4HANA_CLOUD/03c04db2a7434731b7fe21dca77440da/6b2add771a454ac889eddd2b6fa4301c.html
+- Billing Document read/PDF: https://help.sap.com/docs/SAP_S4HANA_CLOUD/03c04db2a7434731b7fe21dca77440da/a9120b013c9a44efaf417e1a66704901.html
+
 ## Local configuration
 Copy the values below into the local `.env` (not GitHub). The API key must never be shared in chat or committed.
 
@@ -25,6 +46,7 @@ SAP_MODE=sandbox
 SAP_SANDBOX_BASE_URL=https://sandbox.api.sap.com
 SAP_SANDBOX_API_KEY=
 
+# These six paths have built-in defaults; override only if the Hub code snippet differs.
 SAP_SANDBOX_SALES_ORDER_PATH=
 SAP_SANDBOX_SALES_ORDER_KEY_PATH=
 SAP_SANDBOX_OUTBOUND_DELIVERY_PATH=
@@ -64,7 +86,7 @@ For the sales-order detail lookup, `SAP_SANDBOX_SALES_ORDER_KEY_PATH` must be th
 - `PATCH /api/sap/sandbox/operations/updateBillingDocument`
 - `PATCH /api/sap/sandbox/operations/updateElectronicDocument`
 
-The POST/PATCH routes are disabled by default and also require their operation-specific path variables. They are generic request adapters; they do not manufacture SAP payloads.
+The POST/PATCH routes are disabled by default. Delivery creation, picking and Billing V4 creation have documented default paths; other writes require their operation-specific path variables. Send a JSON envelope with `parameters` for URL/action parameters, optional `payload` for the OData JSON body, and optional `headers.ifMatch` / `headers.csrfToken` for APIs that require concurrency/CSRF headers. Example shape only: `{ "parameters": { "DeliveryDocument": "...", "DeliveryDocumentItem": "...", "ActualDeliveredQtyInBaseUnit": "...", "BaseUnit": "..." } }`. Use the exact property names and values from the official API schema. The adapter does not manufacture SAP payloads.
 
 ## Recommended test order
 1. Configure the API key locally and one read resource path.
