@@ -44,7 +44,7 @@ export class SapIntegrationService {
     const configuredApis = Object.fromEntries(
       Object.entries(PATH_ENV).map(([name, envName]) => [
         name,
-        Boolean(process.env[envName]),
+        Boolean(process.env[envName] || DEFAULT_PATHS[envName]),
       ]),
     );
     const configuredCount = Object.values(configuredApis).filter(Boolean).length;
