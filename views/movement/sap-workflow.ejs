@@ -1,0 +1,48 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div><h4 class="mb-1">SAP workflow workbench</h4><p class="text-muted mb-0"><%= ticket.ticketNumber %> · sandbox read operations</p></div>
+  <div class="d-flex gap-2"><a href="/movement-tickets/<%= ticket.id %>" class="btn btn-light">Back to ticket</a><a href="/movement-tickets" class="btn btn-light">All tickets</a></div>
+</div>
+<div class="alert alert-warning">Sandbox only. This workbench performs read operations and invoice PDF retrieval. It does not create deliveries, change picking, post goods issue, create invoices, update e-way bills, or touch AutoLine production.</div>
+<div class="row g-3 mb-4">
+  <div class="col-xl-4"><div class="card h-100"><div class="card-body"><h5>1. Sales order</h5><p class="text-muted">Load the order referenced by this movement ticket.</p><div class="input-group"><input id="salesOrder" class="form-control" value="<%= ticket.salesOrder || '' %>" placeholder="Sales order number"><button class="btn btn-primary" id="loadOrder">Load</button></div><div id="orderStatus" class="small text-muted mt-2"></div></div></div></div>
+  <div class="col-xl-4"><div class="card h-100"><div class="card-body"><h5>2. Outbound deliveries</h5><p class="text-muted">Read sample delivery records from the Hub sandbox.</p><button class="btn btn-outline-primary" id="loadDeliveries">Load deliveries</button><div id="deliveryStatus" class="small text-muted mt-2"></div></div></div></div>
+  <div class="col-xl-4"><div class="card h-100"><div class="card-body"><h5>3. Billing documents</h5><p class="text-muted">Read billing records from both supported API versions.</p><div class="d-flex flex-wrap gap-2"><button class="btn btn-outline-primary" id="loadBillingV4">Billing V4</button><button class="btn btn-outline-primary" id="loadBillingV2">Billing V2</button></div><div id="billingStatus" class="small text-muted mt-2"></div></div></div></div>
+</div>
+<div class="card mb-4"><div class="card-body"><h5>4. Invoice PDF</h5><p class="text-muted">Enter an actual billing document number returned by SAP sandbox. The PDF opens in a new tab.</p><div class="row g-2"><div class="col-md-5"><input id="billingDocument" class="form-control" placeholder="Billing document number"></div><div class="col-md-auto"><button id="openInvoice" class="btn btn-primary">Open invoice PDF</button></div></div><div id="pdfStatus" class="small text-muted mt-2"></div></div></div>
+<div class="card"><div class="card-header"><h5 class="mb-0">SAP response viewer</h5></div><div class="card-body"><pre id="responseOutput" class="bg-light rounded p-3 mb-0" style="min-height:180px;max-height:520px;overflow:auto;white-space:pre-wrap">Choose a read action above. Responses from the sandbox will appear here.</pre></div></div>
+<script>
+(() => {
+ const output = document.getElementById('responseOutput');
+ const show = (data) => { output.textContent = JSON.stringify(data, null, 2); };
+ const load = async (url, statusId) => {
+   const status = document.getElementById(statusId);
+   status.textContent = 'Loading…';
+   try {
+     const response = await fetch(url, { headers: { Accept: 'application/json' } });
+     const data = await response.json();
+     if (!response.ok) throw new Error(data.message || 'Request failed');
+     status.textContent = 'Sandbox response received.';
+     show(data);
+   } catch (error) {
+     status.textContent = error.message || 'Unable to load sandbox data.';
+     show({ error: status.textContent });
+   }
+ };
+ document.getElementById('loadOrder').addEventListener('click', () => {
+   const value = document.getElementById('salesOrder').value.trim();
+   if (!value) { document.getElementById('orderStatus').textContent = 'Enter a sales order number.'; return; }
+   load('/api/sap/sandbox/sales-orders/' + encodeURIComponent(value), 'orderStatus');
+ });
+ document.getElementById('loadDeliveries').addEventListener('click', () => load('/api/sap/sandbox/outbound-deliveries?top=10', 'deliveryStatus'));
+ document.getElementById('loadBillingV4').addEventListener('click', () => load('/api/sap/sandbox/billing-documents/v4?top=10', 'billingStatus'));
+ document.getElementById('loadBillingV2').addEventListener('click', () => load('/api/sap/sandbox/billing-documents/v2?top=10', 'billingStatus'));
+ document.getElementById('openInvoice').addEventListener('click', () => {
+   const value = document.getElementById('billingDocument').value.trim();
+   const status = document.getElementById('pdfStatus');
+   if (!value) { status.textContent = 'Enter a billing document number.'; return; }
+   const url = '/api/sap/sandbox/billing-documents/' + encodeURIComponent(value) + '/pdf/file';
+   const tab = window.open(url, '_blank', 'noopener');
+   status.textContent = tab ? 'Invoice PDF opened in a new tab.' : 'Pop-up blocked. Allow pop-ups and try again.';
+ });
+})();
+</script>
