@@ -71,6 +71,7 @@ For the sales-order detail lookup, `SAP_SANDBOX_SALES_ORDER_KEY_PATH` must be th
 ## Routes
 - `GET /api/sap/status`
 - `GET /api/sap/sandbox/status`
+- `GET /api/sap/sandbox/test-reads` (runs sequential GET connectivity checks for configured read APIs)
 - `GET /api/sap/sandbox/sales-orders?top=10`
 - `GET /api/sap/sandbox/sales-orders/:salesOrder`
 - `GET /api/sap/sandbox/outbound-deliveries?top=10`
@@ -91,11 +92,12 @@ The POST/PATCH routes are disabled by default. Delivery creation, picking and Bi
 ## Recommended test order
 1. Configure the API key locally and one read resource path.
 2. Call `GET /api/sap/sandbox/status`.
-3. Test Sales Order GET and inspect the exact response shape.
-4. Configure and test the other GET resources individually.
-5. For each write operation, first confirm that the Hub sandbox supports it, copy the exact endpoint/action and schema, and use only sample data. Enable the write switch only for that test session.
-6. Record actual request/response and outcome in a redacted test report.
-7. Never configure the production AutoLine tenant in this sandbox adapter.
+3. Call `GET /api/sap/sandbox/test-reads` to test all configured read APIs without returning their sample data.
+4. Test Sales Order GET and inspect the exact response shape.
+5. Configure and test optional Electronic Document and Attachment GET resources individually.
+6. For each write operation, first confirm that the Hub sandbox supports it, copy the exact endpoint/action and schema, and use only sample data. Enable the write switch only for that test session.
+7. Record actual request/response and outcome in a redacted test report.
+8. Never configure the production AutoLine tenant in this sandbox adapter.
 
 ## Not implemented / not claimed
 - Full Electronic Document Cockpit automation. The recording shows opening a details dialog and saving/confirming it; the exact released OData API/action and field mapping remain unverified.
