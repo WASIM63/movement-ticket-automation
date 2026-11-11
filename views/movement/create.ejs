@@ -12,7 +12,6 @@
         <div class="col-md-3"><label class="form-label">Plant</label><select class="form-select" name="plantCode"><option value="">Select plant</option><% plants.forEach(p=>{ %><option value="<%= p.code %>"><%= p.code %> - <%= p.name %></option><% }) %></select></div>
         <div class="col-md-3"><label class="form-label">Vehicle number *</label><select class="form-select choices" name="vehicleNumber" required><option value="">Select vehicle</option><% vehicles.forEach(v=>{ %><option value="<%= v.registration %>"><%= v.registration %> <%= v.description ? '- '+v.description : '' %></option><% }) %></select></div>
         <div class="col-md-3"><label class="form-label">Ticket date *</label><input class="form-control" type="date" name="ticketDate" value="<%= new Date().toISOString().slice(0,10) %>" required></div>
-        <div class="col-md-3"><label class="form-label">Sales order reference</label><input class="form-control" name="salesOrder" placeholder="Enter SAP sales order"></div>
         <div class="col-md-3"><label class="form-label">Vendor type</label><select class="form-select" name="vendorType"><option value="">Select</option><option value="2">Code 2 (label to confirm)</option></select></div>
         <div class="col-md-3"><label class="form-label">Transport mode</label><select class="form-select" name="transportMode"><option value="">Select</option><option value="1">Code 1 (label to confirm)</option></select></div>
         <div class="col-md-3"><label class="form-label">Vehicle type</label><select class="form-select" name="vehicleType"><option value="">Select</option><option value="R">Code R (label to confirm)</option></select></div>
@@ -21,8 +20,8 @@
       </div>
     </div></div>
     <div class="card"><div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">Part details</h5><button type="button" class="btn btn-sm btn-primary" id="addRow"><i class="ri-add-line me-1"></i>Add part</button></div>
-      <div class="card-body"><div class="table-responsive"><table class="table table-bordered align-middle" id="itemsTable"><thead class="table-light"><tr><th style="min-width:280px">Part / Product</th><th>Product code</th><th>Customer reference</th><th>Sales order</th><th>Sub M</th><th style="width:120px">Quantity</th><th></th></tr></thead><tbody id="itemsBody"></tbody></table></div>
-      <div class="text-muted small">Choose a part from the master list. Reference fields are filled automatically. Quantity is entered manually.</div></div>
+      <div class="card-body"><div class="table-responsive"><table class="table table-bordered align-middle" id="itemsTable"><thead class="table-light"><tr><th style="min-width:280px">Part / Product</th><th>Product code</th><th>Customer reference</th><th>Mapped sales order</th><th>Sub M</th><th style="width:120px">Quantity</th><th></th></tr></thead><tbody id="itemsBody"></tbody></table></div>
+      <div class="text-muted small">Choose the part number. Its customer reference, Sales Order and Sub M are loaded from the part master automatically. Enter only the loaded quantity.</div></div>
     </div>
     <div class="d-flex justify-content-end gap-2 mb-4"><a href="/movement-tickets" class="btn btn-light">Cancel</a><button type="submit" class="btn btn-success" id="saveBtn"><i class="ri-save-line me-1"></i>Save movement ticket</button></div>
   </form>
@@ -44,7 +43,7 @@ document.getElementById('ticketForm').addEventListener('submit',async e=>{
  e.preventDefault(); const form=e.currentTarget; const fd=new FormData(form);
  const items=[...body.querySelectorAll('tr')].map(tr=>({productCode:tr.dataset.productCode,quantity:tr.querySelector('.qty').value}));
  if(items.some(x=>!x.productCode||!x.quantity)){alert('Select a part and quantity on every row.');return;}
- const payload=Object.fromEntries(fd.entries()); payload.items=items;
+ const payload=Object.fromEntries(fd.entries()); delete payload.salesOrder; payload.items=items;
  const btn=document.getElementById('saveBtn');btn.disabled=true;
  try{const r=await fetch('/api/movement-tickets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await r.json();if(!r.ok)throw new Error(data.message||'Unable to save ticket');location.href='/movement-tickets/'+data.id;}
  catch(err){alert(err.message);btn.disabled=false;}
