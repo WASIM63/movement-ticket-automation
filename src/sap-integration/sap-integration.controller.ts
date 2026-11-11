@@ -58,6 +58,11 @@ export class SapIntegrationController {
     return this.sap.readSandboxElectronicDocumentFiles(Number.isFinite(parsed) ? parsed : 10);
   }
 
+  @Get('sandbox/billing-documents/:billingDocument/pdf')
+  billingPdf(@Param('billingDocument') billingDocument: string) {
+    return this.sap.readSandboxBillingPdf(billingDocument);
+  }
+
   @Get('sandbox/attachments')
   attachments(@Query('top') top?: string) {
     const parsed = top === undefined ? 10 : Number(top);
