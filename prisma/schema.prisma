@@ -57,6 +57,7 @@ model MovementTicket {
   sapDeliveryNumber   String?  @db.VarChar(40)
   sapBillingNumber    String?  @db.VarChar(40)
   sapMessage          String?  @db.Text
+  printCount          Int      @default(0)
   notes               String?  @db.Text
   plant               Plant?   @relation(fields: [plantId], references: [id])
   vehicle             Vehicle? @relation(fields: [vehicleId], references: [id])
